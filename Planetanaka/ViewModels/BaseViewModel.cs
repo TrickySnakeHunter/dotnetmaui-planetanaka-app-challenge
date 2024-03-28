@@ -1,18 +1,32 @@
 ﻿namespace Planetanaka.ViewModels;
 
+// Import necessary namespaces
+
+// Define the BaseViewModel class
 public partial class BaseViewModel : ObservableObject
 {
+    // Define a private field for tracking whether the app is busy
     [ObservableProperty]
     private bool isBusy;
 
-    public BaseViewModel() =>
+    // Constructor for BaseViewModel
+    public BaseViewModel()
+    {
+        // Subscribe to the ConnectivityChanged event
         Connectivity.ConnectivityChanged += Connectivity_ConnectivityChanged;
+    }
 
-    ~BaseViewModel() =>
+    // Destructor for BaseViewModel
+    ~BaseViewModel()
+    {
+        // Unsubscribe from the ConnectivityChanged event
         Connectivity.ConnectivityChanged -= Connectivity_ConnectivityChanged;
+    }
 
+    // Event handler for when the connectivity changes
     private static async void Connectivity_ConnectivityChanged(object sender, ConnectivityChangedEventArgs e)
     {
+        // Define various messages for different connectivity statuses
         TimeSpan unlimitedDuration = TimeSpan.MaxValue;
         const string constrainedInternet = "Internet access is available but is limited.";
         const string lostInternet = "Without connection";
@@ -21,28 +35,35 @@ public partial class BaseViewModel : ObservableObject
         const string activeCell = "Online again on Cell";
         const string activeBluetooth = "Online again on Bluetooth";
 
+        // Define options for the Snackbar when internet is not available
         SnackbarOptions snackbarWithoutInternet = new()
         {
             BackgroundColor = Color.FromRgba("#212121"),
             TextColor = Colors.White,
         };
 
+        // Define options for the Snackbar when internet is available
         SnackbarOptions snackbarWithInternet = new()
         {
             BackgroundColor = Color.FromRgba("#2CA641"),
             TextColor = Colors.White
         };
 
+        // Check the connectivity status and display appropriate Snackbar messages
         if (e.NetworkAccess == NetworkAccess.ConstrainedInternet)
+        {
             await Snackbar.Make(constrainedInternet).Show();
-
+        }
         else if (e.NetworkAccess != NetworkAccess.Internet)
-            await Snackbar.Make
-                (lostInternet,
+        {
+            await Snackbar.Make(
+                lostInternet,
                 actionButtonText: string.Empty,
                 duration: unlimitedDuration,
                 visualOptions: snackbarWithoutInternet).Show();
+        }
 
+        // Loop through all connection profiles and display appropriate Snackbar messages
         foreach (var item in e.ConnectionProfiles)
         {
             switch (item)
@@ -72,5 +93,4 @@ public partial class BaseViewModel : ObservableObject
             }
         }
     }
-
 }
